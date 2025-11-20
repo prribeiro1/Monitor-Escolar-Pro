@@ -9,6 +9,7 @@ import { AttendanceScreen } from './pages/AttendanceScreen';
 import { IncidentsScreen } from './pages/IncidentsScreen';
 import { ReportsScreen } from './pages/ReportsScreen';
 import { backupRepository } from './services/BackupRepository';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 // Declare google property on window object to fix TypeScript errors
 declare global {
@@ -17,105 +18,48 @@ declare global {
   }
 }
 
-// *** CONFIGURAÇÃO DO GOOGLE ***
-// 👇👇👇 COLE O SEU "ID DO CLIENTE" ABAIXO (Mantenha as aspas) 👇👇👇
-const GOOGLE_CLIENT_ID = '183026720548-7p2g2nopms5mnn6g5ctejuraslkaogjd.apps.googleusercontent.com';
-// 👆👆👆 Exemplo: '123456789-abcdefgh.apps.googleusercontent.com'
-
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
 const useAuth = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [tokenClient, setTokenClient] = useState<any>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('school_monitor_user');
     if (stored) setUser(JSON.parse(stored));
 
-    // Inicializar Google Identity Services
-    const initializeGoogle = () => {
-      if (window.google && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_CLIENT_ID')) {
-        try {
-          const client = window.google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: SCOPES,
-            callback: (tokenResponse: any) => {
-              if (tokenResponse && tokenResponse.access_token) {
-                handleGoogleSuccess(tokenResponse.access_token);
-              }
-            },
-          });
-          setTokenClient(client);
-        } catch (err) {
-          console.error("Erro ao inicializar Google Client:", err);
-        }
-      }
-    };
-
-    // Tenta inicializar imediatamente ou espera o script carregar
-    if (window.google) {
-      initializeGoogle();
-    } else {
-      const interval = setInterval(() => {
-        if (window.google) {
-          initializeGoogle();
-          clearInterval(interval);
-        }
-      }, 500);
-    }
+    // Inicializa o plugin do Google Auth
+    GoogleAuth.initialize({
+      clientId: '183026720548-7p2g2nopms5mnn6g5ctejuraslkaogjd.apps.googleusercontent.com',
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+    });
 
     setLoading(false);
   }, []);
 
-  const handleGoogleSuccess = async (accessToken: string) => {
-    // Buscar perfil do usuário com o token
+  const login = async () => {
     try {
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const profile = await res.json();
+      const user = await GoogleAuth.signIn();
 
       const userData = {
-        name: profile.name,
-        email: profile.email,
-        picture: profile.picture,
-        accessToken: accessToken // Guardar token para usar no Drive
+        name: user.name || user.givenName,
+        email: user.email,
+        picture: user.imageUrl,
+        accessToken: user.authentication.accessToken // Token para o Drive
       };
 
       localStorage.setItem('school_monitor_user', JSON.stringify(userData));
       setUser(userData);
     } catch (error) {
-      console.error("Erro ao buscar perfil Google", error);
-      alert("Erro ao validar login Google.");
+      console.error("Erro no login Google:", error);
+      alert("Erro ao fazer login com Google. Tente novamente.");
     }
   };
 
-  const login = () => {
-    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('YOUR_CLIENT_ID')) {
-      alert("CONFIGURAÇÃO NECESSÁRIA:\n\nAbra o arquivo App.tsx e coloque seu GOOGLE_CLIENT_ID real na linha 23.");
-      return;
-    }
-
-    if (tokenClient) {
-      tokenClient.requestAccessToken();
-    } else {
-      alert("Serviço de Login Google ainda não carregou. Verifique sua conexão ou recarregue a página.");
-    }
-  };
-
-  const logout = () => {
-    const stored = localStorage.getItem('school_monitor_user');
-    if (stored) {
-      const u = JSON.parse(stored);
-      if (window.google && u.accessToken) {
-        // Revogar permissão (opcional, mas bom para segurança)
-        try {
-          window.google.accounts.oauth2.revoke(u.accessToken, () => { });
-        } catch (e) {
-          console.warn("Erro ao revogar token", e);
-        }
-      }
+  const logout = async () => {
+    try {
+      await GoogleAuth.signOut();
+    } catch (e) {
+      console.warn("Erro ao deslogar do Google", e);
     }
     localStorage.removeItem('school_monitor_user');
     setUser(null);
