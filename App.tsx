@@ -19,7 +19,7 @@ declare global {
 
 // *** CONFIGURAÇÃO DO GOOGLE ***
 // 👇👇👇 COLE O SEU "ID DO CLIENTE" ABAIXO (Mantenha as aspas) 👇👇👇
-const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com'; 
+const GOOGLE_CLIENT_ID = '183026720548-7p2g2nopms5mnn6g5ctejuraslkaogjd.apps.googleusercontent.com';
 // 👆👆👆 Exemplo: '123456789-abcdefgh.apps.googleusercontent.com'
 
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
@@ -32,90 +32,90 @@ const useAuth = () => {
   useEffect(() => {
     const stored = localStorage.getItem('school_monitor_user');
     if (stored) setUser(JSON.parse(stored));
-    
+
     // Inicializar Google Identity Services
     const initializeGoogle = () => {
-        if (window.google && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_CLIENT_ID')) {
-            try {
-                const client = window.google.accounts.oauth2.initTokenClient({
-                    client_id: GOOGLE_CLIENT_ID,
-                    scope: SCOPES,
-                    callback: (tokenResponse: any) => {
-                        if (tokenResponse && tokenResponse.access_token) {
-                            handleGoogleSuccess(tokenResponse.access_token);
-                        }
-                    },
-                });
-                setTokenClient(client);
-            } catch (err) {
-                console.error("Erro ao inicializar Google Client:", err);
-            }
+      if (window.google && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_CLIENT_ID')) {
+        try {
+          const client = window.google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: SCOPES,
+            callback: (tokenResponse: any) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                handleGoogleSuccess(tokenResponse.access_token);
+              }
+            },
+          });
+          setTokenClient(client);
+        } catch (err) {
+          console.error("Erro ao inicializar Google Client:", err);
         }
+      }
     };
 
     // Tenta inicializar imediatamente ou espera o script carregar
     if (window.google) {
-        initializeGoogle();
+      initializeGoogle();
     } else {
-        const interval = setInterval(() => {
-            if (window.google) {
-                initializeGoogle();
-                clearInterval(interval);
-            }
-        }, 500);
+      const interval = setInterval(() => {
+        if (window.google) {
+          initializeGoogle();
+          clearInterval(interval);
+        }
+      }, 500);
     }
-    
+
     setLoading(false);
   }, []);
 
   const handleGoogleSuccess = async (accessToken: string) => {
-      // Buscar perfil do usuário com o token
-      try {
-          const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-              headers: { Authorization: `Bearer ${accessToken}` }
-          });
-          const profile = await res.json();
-          
-          const userData = {
-              name: profile.name,
-              email: profile.email,
-              picture: profile.picture,
-              accessToken: accessToken // Guardar token para usar no Drive
-          };
+    // Buscar perfil do usuário com o token
+    try {
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const profile = await res.json();
 
-          localStorage.setItem('school_monitor_user', JSON.stringify(userData));
-          setUser(userData);
-      } catch (error) {
-          console.error("Erro ao buscar perfil Google", error);
-          alert("Erro ao validar login Google.");
-      }
+      const userData = {
+        name: profile.name,
+        email: profile.email,
+        picture: profile.picture,
+        accessToken: accessToken // Guardar token para usar no Drive
+      };
+
+      localStorage.setItem('school_monitor_user', JSON.stringify(userData));
+      setUser(userData);
+    } catch (error) {
+      console.error("Erro ao buscar perfil Google", error);
+      alert("Erro ao validar login Google.");
+    }
   };
 
   const login = () => {
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('YOUR_CLIENT_ID')) {
-        alert("CONFIGURAÇÃO NECESSÁRIA:\n\nAbra o arquivo App.tsx e coloque seu GOOGLE_CLIENT_ID real na linha 23.");
-        return;
+      alert("CONFIGURAÇÃO NECESSÁRIA:\n\nAbra o arquivo App.tsx e coloque seu GOOGLE_CLIENT_ID real na linha 23.");
+      return;
     }
 
     if (tokenClient) {
-        tokenClient.requestAccessToken();
+      tokenClient.requestAccessToken();
     } else {
-        alert("Serviço de Login Google ainda não carregou. Verifique sua conexão ou recarregue a página.");
+      alert("Serviço de Login Google ainda não carregou. Verifique sua conexão ou recarregue a página.");
     }
   };
 
   const logout = () => {
     const stored = localStorage.getItem('school_monitor_user');
     if (stored) {
-        const u = JSON.parse(stored);
-        if (window.google && u.accessToken) {
-            // Revogar permissão (opcional, mas bom para segurança)
-            try {
-                window.google.accounts.oauth2.revoke(u.accessToken, () => {});
-            } catch (e) {
-                console.warn("Erro ao revogar token", e);
-            }
+      const u = JSON.parse(stored);
+      if (window.google && u.accessToken) {
+        // Revogar permissão (opcional, mas bom para segurança)
+        try {
+          window.google.accounts.oauth2.revoke(u.accessToken, () => { });
+        } catch (e) {
+          console.warn("Erro ao revogar token", e);
         }
+      }
     }
     localStorage.removeItem('school_monitor_user');
     setUser(null);
@@ -135,7 +135,7 @@ interface BottomNavItemProps {
 const BottomNavItem: React.FC<BottomNavItemProps> = ({ to, icon, label, active }) => {
   const navigate = useNavigate();
   return (
-    <div 
+    <div
       onClick={() => navigate(to)}
       className={`flex flex-col items-center justify-center w-full h-full cursor-pointer transition-colors ${active ? 'text-primary-500' : 'text-gray-400'}`}
     >
@@ -167,7 +167,7 @@ const Layout: React.FC<PropsWithChildren<LayoutProps>> = ({ children, onLogout, 
       titleInputRef.current.focus();
     }
   }, [isEditingTitle]);
-  
+
   const tabs = [
     { path: '/routes', icon: 'road' as IconName, label: 'Rotas' },
     { path: '/stops', icon: 'map-pin' as IconName, label: 'Pontos' },
@@ -184,7 +184,7 @@ const Layout: React.FC<PropsWithChildren<LayoutProps>> = ({ children, onLogout, 
         <div className="flex items-center gap-2">
           <Icon name="face" className="text-primary-500" size={28} />
           {isEditingTitle ? (
-            <input 
+            <input
               ref={titleInputRef}
               value={appTitle}
               onChange={(e) => setAppTitle(e.target.value)}
@@ -200,12 +200,12 @@ const Layout: React.FC<PropsWithChildren<LayoutProps>> = ({ children, onLogout, 
           )}
         </div>
         <div className="flex gap-3">
-            <button onClick={onBackup} disabled={isBackupLoading} className={`p-2 bg-accent-500/20 text-accent-500 rounded-full hover:bg-accent-500/30 transition ${isBackupLoading ? 'opacity-50 animate-pulse' : ''}`}>
-                <Icon name={isBackupLoading ? "save" : "cloud-upload"} size={20} />
-            </button>
-            <button onClick={onLogout} className="p-2 bg-red-500/20 text-red-400 rounded-full hover:bg-red-500/30 transition">
-                <Icon name="log-out" size={20} />
-            </button>
+          <button onClick={onBackup} disabled={isBackupLoading} className={`p-2 bg-accent-500/20 text-accent-500 rounded-full hover:bg-accent-500/30 transition ${isBackupLoading ? 'opacity-50 animate-pulse' : ''}`}>
+            <Icon name={isBackupLoading ? "save" : "cloud-upload"} size={20} />
+          </button>
+          <button onClick={onLogout} className="p-2 bg-red-500/20 text-red-400 rounded-full hover:bg-red-500/30 transition">
+            <Icon name="log-out" size={20} />
+          </button>
         </div>
       </header>
 
@@ -217,12 +217,12 @@ const Layout: React.FC<PropsWithChildren<LayoutProps>> = ({ children, onLogout, 
       {/* Bottom Nav */}
       <nav className="bg-navy-800 h-16 flex items-center justify-around shadow-inner border-t border-navy-700 z-20 shrink-0 pb-safe">
         {tabs.map(tab => (
-          <BottomNavItem 
-            key={tab.path} 
-            to={tab.path} 
-            icon={tab.icon} 
-            label={tab.label} 
-            active={location.pathname === tab.path} 
+          <BottomNavItem
+            key={tab.path}
+            to={tab.path}
+            icon={tab.icon}
+            label={tab.label}
+            active={location.pathname === tab.path}
           />
         ))}
       </nav>
@@ -235,8 +235,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<PropsWithChildren<ProtectedRouteProps>> = ({ children, user }) => {
-    if (!user) return <Navigate to="/login" replace />;
-    return <>{children}</>;
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
 };
 
 export default function App() {
@@ -247,21 +247,21 @@ export default function App() {
     if (backupLoading) return;
     setBackupLoading(true);
     try {
-        // 1. Backup Local
-        await backupRepository.exportDataLocal();
-        
-        // 2. Backup Drive
-        if (user && user.accessToken) {
-            await backupRepository.uploadToDrive(user.accessToken);
-            alert("Sucesso!\n1. Arquivo salvo na pasta Downloads (Dispositivo).\n2. Arquivo enviado para seu Google Drive.");
-        } else {
-            alert("Backup local salvo!\n\nAviso: Não foi possível salvar no Google Drive pois o login não forneceu um token de acesso válido. Tente sair e logar novamente.");
-        }
+      // 1. Backup Local
+      await backupRepository.exportDataLocal();
+
+      // 2. Backup Drive
+      if (user && user.accessToken) {
+        await backupRepository.uploadToDrive(user.accessToken);
+        alert("Sucesso!\n1. Arquivo salvo na pasta Downloads (Dispositivo).\n2. Arquivo enviado para seu Google Drive.");
+      } else {
+        alert("Backup local salvo!\n\nAviso: Não foi possível salvar no Google Drive pois o login não forneceu um token de acesso válido. Tente sair e logar novamente.");
+      }
     } catch (e: any) {
-        console.error(e);
-        alert(`Erro no backup: ${e.message || 'Erro desconhecido'}`);
+      console.error(e);
+      alert(`Erro no backup: ${e.message || 'Erro desconhecido'}`);
     } finally {
-        setBackupLoading(false);
+      setBackupLoading(false);
     }
   };
 
@@ -271,7 +271,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/login" element={!user ? <LoginScreen onLogin={login} /> : <Navigate to="/attendance" />} />
-        
+
         <Route path="/*" element={
           <ProtectedRoute user={user}>
             <Layout onLogout={logout} onBackup={performBackup} isBackupLoading={backupLoading}>
