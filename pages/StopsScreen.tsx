@@ -9,7 +9,7 @@ export const StopsScreen: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedRoutes, setExpandedRoutes] = useState<Record<string, boolean>>({});
-  
+
   // Form State
   const [namesInput, setNamesInput] = useState(''); // Changed to support bulk text
   const [routeId, setRouteId] = useState('');
@@ -21,46 +21,46 @@ export const StopsScreen: React.FC = () => {
     const initialExpanded: Record<string, boolean> = {};
     r.forEach(route => initialExpanded[route.id] = true);
     setExpandedRoutes(initialExpanded);
-    
+
     if (r.length > 0 && !routeId) setRouteId(r[0].id);
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const toggleRoute = (id: string) => {
-    setExpandedRoutes(prev => ({...prev, [id]: !prev[id]}));
+    setExpandedRoutes(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingId) {
-        // Edição Única
-        const stop: Stop = {
-            id: editingId,
-            routeId,
-            name: namesInput,
-            order: stops.find(s => s.id === editingId)?.order || 0
-        };
-        await dbService.saveStop(stop);
+      // Edição Única
+      const stop: Stop = {
+        id: editingId,
+        routeId,
+        name: namesInput,
+        order: stops.find(s => s.id === editingId)?.order || 0
+      };
+      await dbService.saveStop(stop);
     } else {
-        // Criação em Massa (Bulk Add)
-        // Divide por quebra de linha ou vírgula
-        const names = namesInput.split(/[\n,]+/)
-            .map(n => n.trim())
-            .filter(n => n.length > 0);
-            
-        let currentCount = stops.length;
-        
-        for (const name of names) {
-            const newStop: Stop = {
-                id: crypto.randomUUID(),
-                routeId,
-                name,
-                order: currentCount++
-            };
-            await dbService.saveStop(newStop);
-        }
+      // Criação em Massa (Bulk Add)
+      // Divide por quebra de linha ou vírgula
+      const names = namesInput.split(/[\n,]+/)
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+      let currentCount = stops.length;
+
+      for (const name of names) {
+        const newStop: Stop = {
+          id: crypto.randomUUID(),
+          routeId,
+          name,
+          order: currentCount++
+        };
+        await dbService.saveStop(newStop);
+      }
     }
 
     setIsModalOpen(false);
@@ -85,7 +85,7 @@ export const StopsScreen: React.FC = () => {
     <div className="p-4 pb-20">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Pontos de Embarque</h2>
-        <button 
+        <button
           onClick={() => { resetForm(); setIsModalOpen(true); }}
           className="bg-primary-600 hover:bg-primary-500 text-white p-3 rounded-full shadow-lg shadow-primary-600/30"
         >
@@ -100,38 +100,38 @@ export const StopsScreen: React.FC = () => {
 
           return (
             <div key={route.id} className="space-y-2">
-              <div 
+              <div
                 onClick={() => toggleRoute(route.id)}
                 className="flex items-center justify-between bg-navy-800/50 p-3 rounded-lg cursor-pointer hover:bg-navy-800 transition-colors border border-navy-700"
               >
                 <h3 className="text-accent-500 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                    <Icon name="bus" size={16} />
-                    {route.name} ({routeStops.length})
+                  <Icon name="bus" size={16} />
+                  {route.name} ({routeStops.length})
                 </h3>
                 <Icon name={isExpanded ? "x" : "plus"} size={14} className="text-gray-400 rotate-45 transition-transform" />
               </div>
 
               {isExpanded && (
                 <div className="pl-2 space-y-2">
-                    {routeStops.length === 0 && <p className="text-xs text-gray-500 ml-2 py-2">Nenhum ponto cadastrado.</p>}
-                    {routeStops.map(stop => (
-                        <div key={stop.id} className="bg-navy-800 p-4 rounded-xl border border-navy-700 flex justify-between items-center shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-navy-700 p-2 rounded-full text-gray-300">
-                                <Icon name="map-pin" size={18} />
-                            </div>
-                            <span className="text-white font-medium">{stop.name}</span>
+                  {routeStops.length === 0 && <p className="text-xs text-gray-500 ml-2 py-2">Nenhum ponto cadastrado.</p>}
+                  {routeStops.map(stop => (
+                    <div key={stop.id} className="bg-navy-800 p-4 rounded-xl border border-navy-700 flex justify-between items-center shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-navy-700 p-2 rounded-full text-gray-300">
+                          <Icon name="map-pin" size={18} />
                         </div>
-                        <div className="flex gap-2">
-                            <button onClick={() => { setNamesInput(stop.name); setRouteId(stop.routeId); setEditingId(stop.id); setIsModalOpen(true); }} className="p-2 text-gray-400 hover:text-white">
-                                <Icon name="edit" size={16} />
-                            </button>
-                            <button onClick={() => handleDelete(stop.id)} className="p-2 text-red-400 hover:text-red-300">
-                                <Icon name="trash" size={16} />
-                            </button>
-                        </div>
-                        </div>
-                    ))}
+                        <span className="text-white font-medium">{stop.name}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => { setNamesInput(stop.name); setRouteId(stop.routeId); setEditingId(stop.id); setIsModalOpen(true); }} className="p-2 text-gray-400 hover:text-white">
+                          <Icon name="edit" size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(stop.id)} className="p-2 text-red-400 hover:text-red-300">
+                          <Icon name="trash" size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -153,18 +153,18 @@ export const StopsScreen: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
-                    {editingId ? 'Nome do Ponto' : 'Nomes (Um por linha ou separado por vírgula)'}
+                  {editingId ? 'Nome do Ponto' : 'Nomes (Cole uma lista ou digite um por linha)'}
                 </label>
                 {editingId ? (
-                    <input type="text" value={namesInput} onChange={e => setNamesInput(e.target.value)} className="w-full bg-navy-900 border border-navy-700 text-white p-3 rounded-lg" required />
+                  <input type="text" value={namesInput} onChange={e => setNamesInput(e.target.value)} className="w-full bg-navy-900 border border-navy-700 text-white p-3 rounded-lg" required />
                 ) : (
-                    <textarea 
-                        value={namesInput} 
-                        onChange={e => setNamesInput(e.target.value)} 
-                        placeholder="Ex: Padaria Central&#10;Praça da Matriz&#10;Rua das Flores"
-                        className="w-full bg-navy-900 border border-navy-700 text-white p-3 rounded-lg h-32"
-                        required 
-                    />
+                  <textarea
+                    value={namesInput}
+                    onChange={e => setNamesInput(e.target.value)}
+                    placeholder="Ex: Padaria Central&#10;Praça da Matriz&#10;Rua das Flores"
+                    className="w-full bg-navy-900 border border-navy-700 text-white p-3 rounded-lg h-32"
+                    required
+                  />
                 )}
               </div>
               <div className="flex justify-end gap-3 pt-2">

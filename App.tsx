@@ -247,15 +247,15 @@ export default function App() {
     if (backupLoading) return;
     setBackupLoading(true);
     try {
-      // 1. Backup Local
-      await backupRepository.exportDataLocal();
+      // 1. Backup Local (Prioriza Share nativo no mobile)
+      await backupRepository.shareDataLocal();
 
       // 2. Backup Drive
       if (user && user.accessToken) {
         await backupRepository.uploadToDrive(user.accessToken);
-        alert("Sucesso!\n1. Arquivo salvo na pasta Downloads (Dispositivo).\n2. Arquivo enviado para seu Google Drive.");
+        alert("Backup Concluído!\n\n1. Arquivo salvo/compartilhado localmente.\n2. Cópia enviada para o Google Drive com sucesso.");
       } else {
-        alert("Backup local salvo!\n\nAviso: Não foi possível salvar no Google Drive pois o login não forneceu um token de acesso válido. Tente sair e logar novamente.");
+        alert("Backup Local Concluído!\n\nAtenção: O backup NÃO foi enviado para o Google Drive pois você não está logado ou o token expirou.");
       }
     } catch (e: any) {
       console.error(e);
